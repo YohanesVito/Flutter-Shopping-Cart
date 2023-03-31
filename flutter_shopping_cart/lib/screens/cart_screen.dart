@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shopping_cart/model/courier.dart';
-import 'package:flutter_shopping_cart/model/pro'
-    'ductItems.dart';
+import 'package:flutter_shopping_cart/providers/courier_provider.dart';
+import 'package:provider/provider.dart';
+
+import '../model/courier_model.dart';
+import '../providers/product_provider.dart';
 
 class CartScreen extends StatefulWidget {
-  final List<ProductItems> listProduct;
 
   const CartScreen({
     Key? key,
-    required this.listProduct,
   }) : super(key: key);
 
   @override
@@ -17,40 +17,18 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
 
-  String dropdownValue = "SiPecat Rp8000";
-
-  List<Courier> couriers = allCouriers;
-  Courier selectedCourier = allCouriers.first;
-
-  var totalharga = 0;
-  var totalKurir = 0.0;
-  var totalBerat = 0.0;
-
-  void addQuantity(BuildContext context, ProductItems product) {
-    product.count += 1;
-
-  }
-
-  void removeQuantity(BuildContext context, ProductItems product) {
-    product.count -= 1;
-  }
-
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-          leading: BackButton(
-            onPressed: () {
-              Navigator.pop(context, widget.listProduct);
-            },
-          ),
           title: Text("Shopping Cart")),
       body: Column(children: [
         Flexible(
             child: ListView.builder(
-                itemCount: widget.listProduct.length,
+                itemCount: context.watch<ProductProvider>().count,
                 itemBuilder: (context, index) {
-                  final item = widget.listProduct[index];
+                  final item = context.watch<ProductProvider>().listproduct[index];
                   return Card(
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,77 +44,64 @@ class _CartScreenState extends State<CartScreen> {
                             Column(children: [
                               Text(item.title),
                               Text("Harga: Rp${item.price}"),
-                              Text("Jumlah ${item.count}"),
+                              Text("Jumlah ${item.quantity}"),
                               Row(
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.add),
                                     onPressed: () {
                                       //tambah jumlah ketika diklik
-                                      setState(() {
-                                        addQuantity(context, item);
-                                        totalharga += item.price;
-                                        totalBerat += item.weight;
-                                        totalKurir = totalBerat*selectedCourier.price;
-                                      });
+                                      context.read<ProductProvider>().addProduct(index);
                                     },
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.remove),
                                     onPressed: () {
                                       //kurangi jumlah ketika diklik
-                                      setState(() {
-                                        removeQuantity(context, item);
-                                        totalharga -= item.price;
-                                        totalBerat -= item.weight;
-                                      });
+                                        context.read<ProductProvider>().removeProduct(index);
                                     },
                                   ),
                                 ],
                               ),
                             ]),
-                            Text("Total: Rp${item.count * item.price}"),
+                            Text("Sub Total: Rp${context.read<ProductProvider>().getSubTotalProduct(index)}"),
                           ],
                         ),
                       ]));
                 })),
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 16, 20),
+          padding: const EdgeInsets.fromLTRB(20, 15, 16, 20),
           child: Row(children: [
             DropdownButton(
-              value: selectedCourier,
-              items: couriers.map((Courier courier) {
+              value: context.watch<CourierProvider>().getSelectedCourier,
+              items: context.watch<CourierProvider>().couriers.map((Courier courier) {
                 return DropdownMenuItem<Courier>(
                   value: courier,
                   child: Text("${courier.name} -- Rp${courier.price}"),
                 );
               }).toList(),
               onChanged: (Courier? value) {
-                setState(() {
-                  selectedCourier = value!;
-                  totalKurir = totalBerat*selectedCourier.price;
-                });
+                context.read<CourierProvider>().setSelectedCourier(value!);
               },
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(8,8,8,8),
-              child: Text("Berat: $totalBerat"),
+              padding: const EdgeInsets.fromLTRB(20,8,8,8),
+              child: Text("Berat: ${context.read<ProductProvider>().getTotalBerat.toStringAsFixed(2)}"),
             ),
           ]),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(8,8,8,8),
-          child: Text("Total Barang: Rp${totalharga}"),
+          child: Text("Total Bayar Kurir: Rp${context.read<ProductProvider>().getTotalOngkir(context.watch<CourierProvider>().getSelectedCourier!.price).abs().toStringAsFixed(2)}"),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(8,8,8,8),
-          child: Text("Total Bayar Kurir: Rp${totalKurir}"),
+          child: Text("Total Barang: Rp${context.read<ProductProvider>().getTotal}"),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(8,8,8,100),
-          child: Text("Total Bayar: Rp${totalharga+totalKurir}"),
+          padding: const EdgeInsets.fromLTRB(8,8,8,50),
+          child: Text("Total Bayar: Rp${context.read<ProductProvider>().getTotalBayar().abs().toStringAsFixed(2)}"),
         ),
-
       ]),
     );
   }

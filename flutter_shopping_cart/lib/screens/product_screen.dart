@@ -1,43 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shopping_cart/screen/cart.dart';
-import '../model/productItems.dart';
+import 'package:flutter_shopping_cart/providers/product_provider.dart';
+import 'package:flutter_shopping_cart/screens/cart_screen.dart';
+import 'package:provider/provider.dart';
 
-class Product extends StatefulWidget {
-  const Product({
+class ProductScreen extends StatefulWidget {
+  const ProductScreen({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<Product> createState() => _ProductState();
+  State<ProductScreen> createState() => _ProductScreenState();
 }
 
-class _ProductState extends State<Product> {
-  //product
-  List<ProductItems> products = allProductItems;
+class _ProductScreenState extends State<ProductScreen> {
 
-  //product quantity
-  void navigateToCartScreen(BuildContext context) async {
-    // create a copy of the products list
-    List<ProductItems> copyProducts = List.from(products);
-
-    // navigate to the CartScreen and pass the copy of the products list
-    final updatedProducts = await Navigator.push(
+  //navigation
+  void navigateToCartScreen(BuildContext context){
+    Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CartScreen(listProduct: copyProducts),
+        builder: (context) => const CartScreen(),
       ),
     );
-
-    // update the state with the updated products list
-    if (updatedProducts != null) {
-      setState(() {
-        products = updatedProducts;
-      });
-    }
-  }
-
-  void addQuantity(BuildContext context, ProductItems product) {
-    product.count += 1;
   }
 
   @override
@@ -58,14 +42,14 @@ class _ProductState extends State<Product> {
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.only(top: 15),
-            itemCount: products.length,
+            itemCount: context.watch<ProductProvider>().count,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
             itemBuilder: (context, index) {
-              final item = products[index];
+              final item = context.watch<ProductProvider>().listproduct[index];
               return Column(
                 children: [
                   Expanded(
@@ -78,13 +62,11 @@ class _ProductState extends State<Product> {
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () {
-                      setState(() {
-                        addQuantity(context, item);
-                      });
-                      //tambah jumlah ketika diklik
+                      //ubah provider
+                      context.read<ProductProvider>().addProduct(index);
                     },
                   ),
-                  Text(item.count.toString()),
+                  Text(item.quantity.toString()),
                 ],
               );
             },

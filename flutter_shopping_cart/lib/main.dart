@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shopping_cart/screen/product.dart';
+import 'package:flutter_shopping_cart/providers/courier_provider.dart';
+import 'package:flutter_shopping_cart/providers/product_provider.dart';
+import 'package:flutter_shopping_cart/screens/cart_screen.dart';
+import 'package:flutter_shopping_cart/screens/product_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const ShoppingCartApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => ProductProvider()),
+      ChangeNotifierProvider(create: (_) => CourierProvider())
+    ],
+    child: ShoppingCartApp(),
+  ));
 }
 
 class ShoppingCartApp extends StatelessWidget {
@@ -10,10 +20,15 @@ class ShoppingCartApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/',
       title: 'Shopping-Cart',
-      theme: ThemeData(primarySwatch: Colors.grey,),
-      home: const Product(),
+      theme: ThemeData(
+        primarySwatch: Colors.grey,
+      ),
+      routes: {
+        '/': (context) => ProductScreen(),
+        // '/cart': (context) => CartScreen()
+      },
     );
   }
 }
-
