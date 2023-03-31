@@ -11,7 +11,7 @@ void main() {
       ChangeNotifierProvider(create: (_) => ProductProvider()),
       ChangeNotifierProvider(create: (_) => CourierProvider())
     ],
-    child: ShoppingCartApp(),
+    child: const ShoppingCartApp(),
   ));
 }
 
@@ -26,8 +26,8 @@ class ShoppingCartApp extends StatelessWidget {
         primarySwatch: Colors.grey,
       ),
       routes: {
-        '/': (context) => ProductScreen(),
-        // '/cart': (context) => CartScreen()
+        '/': (context) => const ProductScreen(),
+        '/cart': (context) => const CartScreen()
       },
     );
   }

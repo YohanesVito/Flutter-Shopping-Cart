@@ -27,11 +27,4 @@ class CourierProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  int getCourierPrice(double weight) {
-    if (_selectedCourier != null) {
-      return (_selectedCourier!.price * weight).toInt();
-    } else {
-      return 0;
-    }
-  }
 }
